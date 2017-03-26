@@ -5,6 +5,13 @@
 	left: 20px;
 }
 
+#state
+{
+	position: fixed;
+	top: 20px;
+	left: 450px;
+}
+
 #svg1
 {
 	position: fixed;

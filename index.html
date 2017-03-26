@@ -10,13 +10,16 @@
   	<div id='app1'>
   		<div id='btn_list'>
 	  		<button v-on:click='decreaseLevel'><</button>
-	  		Level:{{level}}
+	  		Level:{{level+1}}
 	  		<button v-on:click='increaseLevel'>></button>
 	  		<button v-on:click='reset'>重設</button>
   		</div>
+  		<div id='state'>
+  			<span>Total CF:{{this.getPolygons().length}}</span>
+  		</div>
 	  	<svg id='svg1' width="600" height="540">
-		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" style="fill:blue;stroke:black;stroke-width:0.3;fill-opacity:0.2" />
-		    <circle v-for="circle in filterCircles" v-bind:cx="circle.x" v-bind:cy="circle.y" r="1" stroke="none" fill="red"/>
+		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" v-bind:style="polygon.style" />
+		    <circle v-for="circle in filterCircles" v-bind:cx="circle.x" v-bind:cy="circle.y" v-bind:r="r" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
   	<script type="text/javascript">
@@ -43,6 +46,9 @@
 		  ]
 		},
 		computed:{
+			r:function(){
+				return 1/Math.pow(this.level+1, 0.5);
+			},
 			filterCircles: function(){
 				var self = this;
 				return this.circles.filter(function(el){
@@ -51,57 +57,49 @@
 			},
 			polygons: function(){
 			  var result=[];
+			  var polygons=this.getPolygons();
 
-			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
-				for(var idx in this.history[curLevel].polygons)
-				  result.push(this.polygonGenerator(this.history[curLevel].polygons[idx]));
+			  for(var idx in polygons)
+			  	result.push(this.polygonGenerator(polygons[idx]));
 
 			  return result;
 			}
 		},
 		methods:{
+			getPolygons:function(){
+			  var result=[];
+
+			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
+			  	Array.prototype.push.apply(result, this.history[curLevel].polygons);
+
+			  return result;
+			},
 			reset:function(){
 				this.level = 0;
-				this.circles = [
-				    {x:50, y:490},
-					{x:550, y:490},
-					{x:300, y:56.9873}
-				];
-				this.history = [
-					{
-				    	level: 0,
-				    	polygons:[
-				    	  [
-						    {x:50, y:490},
-							{x:550, y:490},
-							{x:300, y:56.9873}
-						  ]
-				    	]
-				    }
-				];
 			},
 			decreaseLevel: function(){
 				if(this.level > 0)
 					this.level--;
 			},
 			increaseLevel: function(){
-				if(this.level == 6)
-				{
-					alert('因連線數限制，最多實現六重三角');
-					return;
-				}
+				var self = this;
+				var hasHistory = false;
 
 				//檢查歷史紀錄
 				for(var idx in this.history)
 				{
 					if(this.history[idx].level == this.level+1){
 						this.level++;
-						return;
+						hasHistory = true;
+						break;
 					}
 				}
+				if(hasHistory || (this.level >= 5 && !confirm('因連線數限制，最多實現六重三角，確定要突破極限？')))
+					return;
 
 				var newPoints = [];
 				var newPolygons = [];
+				var oldPolygons = this.getPolygons();
 
 				for(var idx in this.history[this.level].polygons){
 				  var polygon = this.history[this.level].polygons[idx];
@@ -112,7 +110,7 @@
 				    var newPolygonCombs = k_combinations([polygon[0], polygon[1], polygon[2], newPoint], 3).filter(function(newPolygon)
 			    	{
 			      		//排除已存在的組合
-			    		return !(newPolygon.includes(polygon[0]) && newPolygon.includes(polygon[1]) && newPolygons.includes(polygon[2]));
+			    		return !self.checkExist(oldPolygons, newPolygon);
 			    	});
 
 					Array.prototype.push.apply(newPolygons, newPolygonCombs);
@@ -137,7 +135,8 @@
 			     points += pointsArray[idx].x + "," + pointsArray[idx].y + " ";
 
 			   return {
-			     points: points
+			     points: points,
+			     style: 'fill:blue;stroke:black;stroke-width:'+1/Math.pow(this.level+1, 0.5)+';fill-opacity:0.3'
 			   };
 			},
 			//取得三角形內心座標
@@ -154,6 +153,20 @@
 			    x: Math.round(((a.x * length_bc + b.x * length_ac + c.x * length_ab)/totalLenth) * 10000) / 10000,
 			    y: Math.round(((a.y * length_bc + b.y * length_ac + c.y * length_ab)/totalLenth) * 10000) / 10000,
 			  }
+			},
+			checkExist: function(polygonList, polygon){
+				for(var idx in polygonList){
+					var exist = false;
+					for(var idx2 in polygon){
+						if(polygon[idx2].x != polygonList[idx][idx2].x || polygon[idx2].y != polygonList[idx][idx2].y)
+							break;
+						else if(idx2 == 2)
+							exist = true;
+					}
+					if(exist)
+						return true;
+				}
+				return false;
 			}
 		},
   	  });
