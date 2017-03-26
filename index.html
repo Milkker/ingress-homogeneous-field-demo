@@ -9,7 +9,9 @@
   <body>
   	<div id='app1'>
   		<div id='btn_list'>
-	  		<button v-on:click='increaseLevel'>增加</button>
+	  		<button v-on:click='decreaseLevel'><</button>
+	  		Level:{{level}}
+	  		<button v-on:click='increaseLevel'>></button>
 	  		<button v-on:click='reset'>重設</button>
   		</div>
 	  	<svg id='svg1' width="600" height="600">
@@ -72,12 +74,26 @@
 				    }
 				];
 			},
+			decreaseLevel: function(){
+				if(this.level > 0)
+					this.level--;
+			},
 			increaseLevel: function(){
 				if(this.level == 6)
 				{
 					alert('因連線數限制，最多實現六重三角');
 					return;
 				}
+
+				//檢查歷史紀錄
+				for(var idx in this.history)
+				{
+					if(this.history[idx].level == this.level+1){
+						this.level++;
+						return;
+					}
+				}
+
 				var newPoints = [];
 				var newPolygons = [];
 
