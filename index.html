@@ -16,7 +16,7 @@
   		</div>
 	  	<svg id='svg1' width="600" height="600">
 		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" style="fill:blue;stroke:black;stroke-width:1;fill-opacity:0.2" />
-		    <circle v-for="circle in circles" v-bind:cx="circle.x" v-bind:cy="circle.y" r="0.3" stroke="none" fill="red"/>
+		    <circle v-for="circle in filterCircles" v-bind:cx="circle.x" v-bind:cy="circle.y" r="1" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
   	<script type="text/javascript">
@@ -25,9 +25,9 @@
 		data : {
 		  level: 0,
 		  circles:[
-		    {x:50, y:550},
-			{x:550, y:550},
-			{x:300, y:116.9873}
+		    {level:0, x:50, y:550},
+			{level:0, x:550, y:550},
+			{level:0, x:300, y:116.9873}
 		  ],
 		  history:[
 		    {
@@ -43,6 +43,12 @@
 		  ]
 		},
 		computed:{
+			filterCircles: function(){
+				var self = this;
+				return this.circles.filter(function(el){
+					return el.level <= self.level
+				});
+			},
 			polygons: function(){
 			  var result=[];
 
@@ -113,9 +119,14 @@
 				  }
 				}
 
+				this.level++;
+
+				for(var idx in newPoints)
+					newPoints[idx].level = this.level;
+
 				Array.prototype.push.apply(this.circles, newPoints);
 				this.history.push({
-				  level: ++this.level,
+				  level: this.level,
 				  polygons: newPolygons
 				});
 			},
