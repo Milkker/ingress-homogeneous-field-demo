@@ -73,6 +73,11 @@
 				];
 			},
 			increaseLevel: function(){
+				if(this.level == 6)
+				{
+					alert('因連線數限制，最多實現六重三角');
+					return;
+				}
 				var newPoints = [];
 				var newPolygons = [];
 
