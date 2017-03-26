@@ -14,8 +14,8 @@
 	  		<button v-on:click='increaseLevel'>></button>
 	  		<button v-on:click='reset'>重設</button>
   		</div>
-	  	<svg id='svg1' width="600" height="600">
-		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" style="fill:blue;stroke:black;stroke-width:1;fill-opacity:0.2" />
+	  	<svg id='svg1' width="600" height="540">
+		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" style="fill:blue;stroke:black;stroke-width:0.3;fill-opacity:0.2" />
 		    <circle v-for="circle in filterCircles" v-bind:cx="circle.x" v-bind:cy="circle.y" r="1" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
@@ -25,18 +25,18 @@
 		data : {
 		  level: 0,
 		  circles:[
-		    {level:0, x:50, y:550},
-			{level:0, x:550, y:550},
-			{level:0, x:300, y:116.9873}
+		    {level:0, x:50, y:490},
+			{level:0, x:550, y:490},
+			{level:0, x:300, y:56.9873}
 		  ],
 		  history:[
 		    {
 		    	level: 0,
 		    	polygons:[
 		    	  [
-				    {x:50, y:550},
-					{x:550, y:550},
-					{x:300, y:116.9873}
+				    {x:50, y:490},
+					{x:550, y:490},
+					{x:300, y:56.9873}
 				  ]
 		    	]
 		    }
@@ -63,18 +63,18 @@
 			reset:function(){
 				this.level = 0;
 				this.circles = [
-				    {x:50, y:550},
-					{x:550, y:550},
-					{x:300, y:116.9873}
+				    {x:50, y:490},
+					{x:550, y:490},
+					{x:300, y:56.9873}
 				];
 				this.history = [
 					{
 				    	level: 0,
 				    	polygons:[
 				    	  [
-						    {x:50, y:550},
-							{x:550, y:550},
-							{x:300, y:116.9873}
+						    {x:50, y:490},
+							{x:550, y:490},
+							{x:300, y:56.9873}
 						  ]
 				    	]
 				    }
