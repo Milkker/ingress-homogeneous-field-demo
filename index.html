@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>Vue SVG practice</title>
+  	<link rel='stylesheet' type='text/css' href='style.css'>
+  	<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.5/vue.min.js'></script>
+  	<script src="combinations.js"></script>
+  </head>
+  <body>
+  	<div id='app1'>
+  		<div id='btn_list'>
+	  		<button v-on:click='increaseLevel'>增加</button>
+	  		<button v-on:click='reset'>重設</button>
+  		</div>
+	  	<svg id='svg1' width="600" height="600">
+		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" style="fill:blue;stroke:black;stroke-width:1;fill-opacity:0.2" />
+		    <circle v-for="circle in circles" v-bind:cx="circle.x" v-bind:cy="circle.y" r="0.3" stroke="none" fill="red"/>
+	  	</svg>
+  	</div>
+  	<script type="text/javascript">
+  	  var app = new Vue({
+  	  	el:"#app1",
+		data : {
+		  level: 0,
+		  circles:[
+		    {x:50, y:550},
+			{x:550, y:550},
+			{x:300, y:116.9873}
+		  ],
+		  history:[
+		    {
+		    	level: 0,
+		    	polygons:[
+		    	  [
+				    {x:50, y:550},
+					{x:550, y:550},
+					{x:300, y:116.9873}
+				  ]
+		    	]
+		    }
+		  ]
+		},
+		computed:{
+			polygons: function(){
+			  var result=[];
+
+			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
+				for(var idx in this.history[curLevel].polygons)
+				  result.push(this.polygonGenerator(this.history[curLevel].polygons[idx]));
+
+			  return result;
+			}
+		},
+		methods:{
+			reset:function(){
+				this.level = 0;
+				this.circles = [
+				    {x:50, y:550},
+					{x:550, y:550},
+					{x:300, y:116.9873}
+				];
+				this.history = [
+					{
+				    	level: 0,
+				    	polygons:[
+				    	  [
+						    {x:50, y:550},
+							{x:550, y:550},
+							{x:300, y:116.9873}
+						  ]
+				    	]
+				    }
+				];
+			},
+			increaseLevel: function(){
+				var newPoints = [];
+				var newPolygons = [];
+
+				for(var idx in this.history[this.level].polygons){
+				  var polygon = this.history[this.level].polygons[idx];
+				  var newPoint = this.getTriangleHeart(polygon[0], polygon[1], polygon[2]);
+
+				  if(!this.circles.includes(newPoint)){
+				  	newPoints.push(newPoint);
+				    var newPolygonCombs = k_combinations([polygon[0], polygon[1], polygon[2], newPoint], 3).filter(function(newPolygon)
+			    	{
+			      		//排除已存在的組合
+			    		return !(newPolygon.includes(polygon[0]) && newPolygon.includes(polygon[1]) && newPolygons.includes(polygon[2]));
+			    	});
+
+					Array.prototype.push.apply(newPolygons, newPolygonCombs);
+				  }
+				}
+
+				Array.prototype.push.apply(this.circles, newPoints);
+				this.history.push({
+				  level: ++this.level,
+				  polygons: newPolygons
+				});
+			},
+			polygonGenerator: function(pointsArray){
+			   var points = "";
+
+			   for(var idx in pointsArray)
+			     points += pointsArray[idx].x + "," + pointsArray[idx].y + " ";
+
+			   return {
+			     points: points
+			   };
+			},
+			//取得三角形內心座標
+			getTriangleHeart: function(a, b, c){
+			  var getLength = function(a, b){
+			    return Math.pow(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2), 0.5);
+			  };
+			  var length_ab = getLength(a,b),
+			      length_bc = getLength(b,c),
+			      length_ac = getLength(a,c);
+			  var totalLenth = length_ab + length_bc + length_ac;
+			  
+			  return {
+			    x: Math.round(((a.x * length_bc + b.x * length_ac + c.x * length_ab)/totalLenth) * 10000) / 10000,
+			    y: Math.round(((a.y * length_bc + b.y * length_ac + c.y * length_ab)/totalLenth) * 10000) / 10000,
+			  }
+			}
+		},
+  	  });
+  	</script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+#btn_list
+{
+	position: fixed;
+	top: 20px;
+	left: 20px;
+}
+
+#svg1
+{
+	position: fixed;
+	top: 50px;
+	left: 20px;
+	background-color: #eee;
+	height:90%;
+}
