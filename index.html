@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+  	<meta charset="UTF-8">
   	<title>Vue SVG practice</title>
   	<link rel='stylesheet' type='text/css' href='style.css'>
   	<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.5/vue.min.js'></script>
@@ -8,19 +9,23 @@
   </head>
   <body>
   	<div id='app1'>
-  		<div id='btn_list'>
-	  		<button v-on:click='decreaseLevel'><</button>
+  		<button id='btnLeft' @click='decreaseSeqno'><</button>
+  		<button id='btnRight' @click='increaseSeqno'>></button>
+  		<button id='btnDown' @click='decreaseLevel'>V</button>
+  		<button id='btnUp' @click='increaseLevel'>^</button>
+	  	<button id='btnReset' @click='reset'>重設</button>
+  		<div id='state1'>
+	  		<input type="range" v-model='seqno' min='-1' :max='getMaxSeqno'/><br/>
+  			Seqno:{{seqno}}<br/>
 	  		Level:{{level+1}}
-	  		<button v-on:click='increaseLevel'>></button>
-	  		<button v-on:click='reset'>重設</button>
   		</div>
   		<div id='state'>
   			<span>Total CF:{{this.getPolygons().length}}</span>
   		</div>
 	  	<svg id='svg1' width="600" height="540">
 		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-		    <path v-for="path in paths" :d="path | path_d" fill='none' stroke='black' :stroke-width="r"  />
-		    <circle v-for="circle in filterCircles" :cx="circle.x" v-bind:cy="circle.y" :r="r" stroke="none" fill="red"/>
+		    <path v-for="path in paths" :d="path | path_d" @click='test' fill='none' stroke='#777' stroke-width="3"  />
+		    <circle v-for="circle in filterCircles" :cx="circle.x" v-bind:cy="circle.y" r="3" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
   	<script type="text/javascript">
@@ -43,6 +48,7 @@
 			}
   	  	},
 		data : {
+		  seqno: -1,
 		  level: 0,
 		  circles:[
 		    {level:0, x:50, y:490},
@@ -53,9 +59,9 @@
 		    {
 		    	level: 0,
 				paths:[
-				  { level:0, begin:{x:50,y:490}, end:{x:550, y:490}},
-				  { level:0, begin:{x:550,y:490}, end:{x:300, y:56.9873}},
-				  { level:0, begin:{x:300,y:56.9873}, end:{x:50, y:490}}
+				  { level:0, beginLevel:0, endLevel:0, begin:{x:50,y:490}, end:{x:550, y:490}},
+				  { level:0, beginLevel:0, endLevel:0, begin:{x:550,y:490}, end:{x:300, y:56.9873}},
+				  { level:0, beginLevel:0, endLevel:0, begin:{x:300,y:56.9873}, end:{x:50, y:490}}
 				],
 		    	polygons:[
 		    	  [
@@ -81,15 +87,31 @@
 			  var result=[];
 
 			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
-			  	Array.prototype.push.apply(result, this.history[curLevel].paths);
+			  	for(var idx in this.history[curLevel].paths)
+			  	{
+			  		var path = this.history[curLevel].paths[idx];
+			  		var curSeqno = this.getSeqByPath(this.level, path.beginLevel, path.endLevel)
+
+			  		if(this.seqno <= -1 || this.seqno >= curSeqno)
+			  			result.push(path);
+			  	}
 
 			  return result;
 			},
 			polygons: function(){
 			  return this.getPolygons();
+			},
+			getMaxSeqno: function(){
+				return this.getMaxSeqno2();
 			}
 		},
 		methods:{
+			getMaxSeqno2: function(){
+				return (this.level + 2) * (this.level + 1) / 2;
+			},
+			test:function(){
+				event.target.classList.toggle('fade');
+			},
 			getPolygons:function(){
 			  var result=[];
 
@@ -99,7 +121,18 @@
 			  return result;
 			},
 			reset:function(){
+				this.seqno = -1;
 				this.level = 0;
+			},
+			decreaseSeqno: function(){
+				if(this.seqno > -1)
+					this.seqno--;
+			},
+			increaseSeqno:function(){
+				var max = this.getMaxSeqno2();
+
+				if(max > this.seqno)
+					this.seqno++;
 			},
 			decreaseLevel: function(){
 				if(this.level > 0)
@@ -108,6 +141,7 @@
 			increaseLevel: function(){
 				var self = this;
 				var hasHistory = false;
+				self.seqno = -1;
 
 				//檢查歷史紀錄
 				for(var idx in this.history)
@@ -121,6 +155,7 @@
 				if(hasHistory || (this.level >= 5 && !confirm('因連線數限制，最多實現六重三角，確定要突破極限？')))
 					return;
 
+				var newLevel = this.level+1;
 				var newPoints = [];
 				var newPaths = [];
 				var newPolygons = [];
@@ -131,12 +166,13 @@
 				  var newPoint = this.getTriangleHeart(polygon[0], polygon[1], polygon[2]);
 
 				  if(!this.circles.includes(newPoint)){
+				  	newPoint.level = newLevel;
 				  	newPoints.push(newPoint);
 
 				  	//get new path
-				  	newPaths.push({ level:this.level+1, begin:newPoint, end:polygon[0]});
-				  	newPaths.push({ level:this.level+1, begin:newPoint, end:polygon[1]});
-				  	newPaths.push({ level:this.level+1, begin:newPoint, end:polygon[2]});
+				  	newPaths.push({ level:newLevel, beginLevel:polygon[0].level, endLevel:newPoint.level, begin:polygon[0], end:newPoint});
+				  	newPaths.push({ level:newLevel, beginLevel:polygon[1].level, endLevel:newPoint.level, begin:polygon[1], end:newPoint});
+				  	newPaths.push({ level:newLevel, beginLevel:polygon[2].level, endLevel:newPoint.level, begin:polygon[2], end:newPoint});
 
 				  	//get new polygon
 				    var newPolygonCombs = k_combinations([polygon[0], polygon[1], polygon[2], newPoint], 3).filter(function(newPolygon)
@@ -149,10 +185,7 @@
 				  }
 				}
 
-				this.level++;
-
-				for(var idx in newPoints)
-					newPoints[idx].level = this.level;
+				this.level = newLevel;
 
 				Array.prototype.push.apply(this.circles, newPoints);
 				this.history.push({
@@ -200,9 +233,45 @@
 						return true;
 				}
 				return false;
+			},
+			getSeqByPath: function(level, beginLevel, endLevel){
+				var h = level - beginLevel + 1;
+				var maxNumInPreviousRow = h * (h - 1)/2;
+
+				return endLevel - beginLevel + maxNumInPreviousRow + 1;
+			},
+			getPathBySeq: function(level, seq){
+				var h = Math.ceil((Math.pow(8*seq + 1, 0.5) - 1) / 2);
+				var maxNumInRow = h * (1 + h)/2;
+
+				return {
+					beginLevel: level - h + 1,
+					endLevel: level + seq - maxNumInRow
+				}
 			}
 		},
   	  });
+	  window.addEventListener('keyup', function(event) {
+	  	switch(event.keyCode)
+	  	{
+	        // Left-Arrow
+	        case 37:
+	          app.decreaseSeqno();
+	          break;
+	      	// Up-Arrow
+	        case 38:
+	          app.increaseLevel();
+	          break;
+	      	// Right-Arrow
+	        case 39:
+	          app.increaseSeqno();
+	          break;
+	      	// Down-Arrow
+	        case 40:
+	          app.decreaseLevel();
+	          break;
+	  	}
+      });
   	</script>
   </body>
 </html>

@@ -1,21 +1,66 @@
-#btn_list
+.fade
+{
+	stroke:red;
+}
+
+#state1
 {
 	position: fixed;
-	top: 20px;
-	left: 20px;
+	top: 10px;
+	left: 140px;
+}
+
+#btnReset
+{
+	position: fixed;
+	top: 30px;
+	left: 80px;
+}
+
+#btnLeft
+{
+	position: fixed;
+	top: 30px;
+	left: 30px;
+}
+
+#btnRight
+{
+	position: fixed;
+	top: 30px;
+	left: 50px;
+}
+
+#btnUp
+{
+	position: fixed;
+	top: 10px;
+	left: 40px;
+}
+
+#btnDown
+{
+	position: fixed;
+	top: 50px;	
+	left: 40px;
 }
 
 #state
 {
 	position: fixed;
-	top: 20px;
+	top: 10px;
 	left: 450px;
 }
 
 #svg1
 {
 	position: fixed;
-	top: 50px;
+	top: 80px;
 	left: 20px;
-	background-color: #eee;
+	background-color: #ddd;
+}
+
+#svg1 path
+{
+	cursor:pointer;
 }
