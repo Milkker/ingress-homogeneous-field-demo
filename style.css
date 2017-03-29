@@ -1,5 +1,9 @@
 .active
 {
+	stroke:blue;
+}
+.over
+{
 	stroke:red;
 }
 

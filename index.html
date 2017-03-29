@@ -15,17 +15,17 @@
   		<button id='btnUp' @click='increaseLevel'>^</button>
 	  	<button id='btnReset' @click='reset'>重設</button>
   		<div id='state1'>
-	  		<input type="range" v-model='seqno' min='-1' :max='getMaxSeqno'/><br/>
-  			Seqno:{{seqno}}<br/>
-	  		Level:{{level+1}}
+	  		{{level+1}}重三角(上下切換)<br/>
+  			連線順序(左右切換)：{{seqno==-1 ? '全部連線': seqno}}<br/>
+	  		<input type="range" v-model='seqno' min='-1' :max='getMaxSeqno'/>
   		</div>
   		<div id='state'>
   			<span>Total CF:{{this.getPolygons().length}}</span>
   		</div>
 	  	<svg id='svg1' width="600" height="540">
 		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-		    <path v-for="path in paths" :d="path | path_d" @click='toogleActive' fill='none' stroke='#777' stroke-width="3"  />
-		    <circle v-for="circle in filterCircles" :cx="circle.x" v-bind:cy="circle.y" r="3" stroke="none" fill="red"/>
+		    <path v-for="path in paths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
+		    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
   	<script type="text/javascript">
@@ -44,7 +44,7 @@
 			   return points;
 			},
 			polygon_style: function(polygon){
-			   return 'fill:blue;stroke:none;fill-opacity:0.3'
+			   return 'fill:blue;stroke:none;fill-opacity:0.1'
 			}
   	  	},
 		data : {
@@ -75,7 +75,7 @@
 		},
 		computed:{
 			r:function(){
-				return (1/Math.pow(this.level+1, 0.5)) * 2;
+				return (1/Math.pow(this.level+1, 0.5)) * 3;
 			},
 			filterCircles: function(){
 				var self = this;
@@ -108,6 +108,9 @@
 		methods:{
 			getMaxSeqno2: function(){
 				return (this.level + 2) * (this.level + 1) / 2 - this.level;
+			},
+			toogleOver:function(){
+				event.target.classList.toggle('over');
 			},
 			toogleActive:function(){
 				event.target.classList.toggle('active');
