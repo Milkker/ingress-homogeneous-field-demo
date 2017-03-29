@@ -24,7 +24,7 @@
   		</div>
 	  	<svg id='svg1' width="600" height="540">
 		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-		    <path v-for="path in paths" :d="path | path_d" @click='test' fill='none' stroke='#777' stroke-width="3"  />
+		    <path v-for="path in paths" :d="path | path_d" @click='toogleActive' fill='none' stroke='#777' stroke-width="3"  />
 		    <circle v-for="circle in filterCircles" :cx="circle.x" v-bind:cy="circle.y" r="3" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
@@ -107,10 +107,10 @@
 		},
 		methods:{
 			getMaxSeqno2: function(){
-				return (this.level + 2) * (this.level + 1) / 2;
+				return (this.level + 2) * (this.level + 1) / 2 - this.level;
 			},
-			test:function(){
-				event.target.classList.toggle('fade');
+			toogleActive:function(){
+				event.target.classList.toggle('active');
 			},
 			getPolygons:function(){
 			  var result=[];
@@ -235,18 +235,24 @@
 				return false;
 			},
 			getSeqByPath: function(level, beginLevel, endLevel){
+				//舊版level base on zero 但計算公式是base on one。
+				level++;
+				beginLevel++;
+				endLevel++;
+
 				var h = level - beginLevel + 1;
 				var maxNumInPreviousRow = h * (h - 1)/2;
 
-				return endLevel - beginLevel + maxNumInPreviousRow + 1;
+				return endLevel - beginLevel + maxNumInPreviousRow + 1 - h + (h == level ? 1 : 0);
 			},
 			getPathBySeq: function(level, seq){
 				var h = Math.ceil((Math.pow(8*seq + 1, 0.5) - 1) / 2);
 				var maxNumInRow = h * (1 + h)/2;
 
+				//舊版level base on zero 但計算公式是base on one。
 				return {
-					beginLevel: level - h + 1,
-					endLevel: level + seq - maxNumInRow
+					beginLevel: level - h + 1 - 1,
+					endLevel: level + seq - maxNumInRow - 1
 				}
 			}
 		},
