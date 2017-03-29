@@ -18,13 +18,30 @@
   			<span>Total CF:{{this.getPolygons().length}}</span>
   		</div>
 	  	<svg id='svg1' width="600" height="540">
-		    <polygon v-for="polygon in polygons" v-bind:points="polygon.points" v-bind:style="polygon.style" />
-		    <circle v-for="circle in filterCircles" v-bind:cx="circle.x" v-bind:cy="circle.y" v-bind:r="r" stroke="none" fill="red"/>
+		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
+		    <path v-for="path in paths" :d="path | path_d" fill='none' stroke='black' :stroke-width="r"  />
+		    <circle v-for="circle in filterCircles" :cx="circle.x" v-bind:cy="circle.y" :r="r" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
   	<script type="text/javascript">
   	  var app = new Vue({
   	  	el:"#app1",
+  	  	filters: {
+  	  		path_d : function(path){
+  	  			return 'M' + path.begin.x + ' ' + path.begin.y + ' L' + path.end.x + ' ' + path.end.y;
+  	  		},
+			polygon_points: function(polygon){
+			   var points = "";
+
+			   for(var idx in polygon)
+			     points += polygon[idx].x + "," + polygon[idx].y + " ";
+
+			   return points;
+			},
+			polygon_style: function(polygon){
+			   return 'fill:blue;stroke:none;fill-opacity:0.3'
+			}
+  	  	},
 		data : {
 		  level: 0,
 		  circles:[
@@ -35,11 +52,16 @@
 		  history:[
 		    {
 		    	level: 0,
+				paths:[
+				  { level:0, begin:{x:50,y:490}, end:{x:550, y:490}},
+				  { level:0, begin:{x:550,y:490}, end:{x:300, y:56.9873}},
+				  { level:0, begin:{x:300,y:56.9873}, end:{x:50, y:490}}
+				],
 		    	polygons:[
 		    	  [
-				    {x:50, y:490},
-					{x:550, y:490},
-					{x:300, y:56.9873}
+				    {level:0, x:50, y:490},
+					{level:0, x:550, y:490},
+					{level:0, x:300, y:56.9873}
 				  ]
 		    	]
 		    }
@@ -47,7 +69,7 @@
 		},
 		computed:{
 			r:function(){
-				return 1/Math.pow(this.level+1, 0.5);
+				return (1/Math.pow(this.level+1, 0.5)) * 2;
 			},
 			filterCircles: function(){
 				var self = this;
@@ -55,14 +77,16 @@
 					return el.level <= self.level
 				});
 			},
-			polygons: function(){
+			paths: function(){
 			  var result=[];
-			  var polygons=this.getPolygons();
 
-			  for(var idx in polygons)
-			  	result.push(this.polygonGenerator(polygons[idx]));
+			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
+			  	Array.prototype.push.apply(result, this.history[curLevel].paths);
 
 			  return result;
+			},
+			polygons: function(){
+			  return this.getPolygons();
 			}
 		},
 		methods:{
@@ -98,6 +122,7 @@
 					return;
 
 				var newPoints = [];
+				var newPaths = [];
 				var newPolygons = [];
 				var oldPolygons = this.getPolygons();
 
@@ -107,6 +132,13 @@
 
 				  if(!this.circles.includes(newPoint)){
 				  	newPoints.push(newPoint);
+
+				  	//get new path
+				  	newPaths.push({ level:this.level+1, begin:newPoint, end:polygon[0]});
+				  	newPaths.push({ level:this.level+1, begin:newPoint, end:polygon[1]});
+				  	newPaths.push({ level:this.level+1, begin:newPoint, end:polygon[2]});
+
+				  	//get new polygon
 				    var newPolygonCombs = k_combinations([polygon[0], polygon[1], polygon[2], newPoint], 3).filter(function(newPolygon)
 			    	{
 			      		//排除已存在的組合
@@ -125,6 +157,7 @@
 				Array.prototype.push.apply(this.circles, newPoints);
 				this.history.push({
 				  level: this.level,
+				  paths: newPaths,
 				  polygons: newPolygons
 				});
 			},
