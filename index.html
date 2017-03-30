@@ -17,7 +17,7 @@
   		<nav class="navbar navbar-default navbar-fixed-top">
   			<div class="container-fluid">
     			<div class="navbar-header">
-      				<a class="navbar-brand" href="#">{{level+1}}重三角({{this.getPolygons().length}} CF){{seqno==-1 ? '': ('&nbsp;-&nbsp;第' + seqno +'步')}}</a>
+      				<a class="navbar-brand" href="#">{{level+1}}重三角{{seqno==-1 ? '': ('&nbsp;-&nbsp;第' + seqno +'步')}}&nbsp;({{this.filterPolygons.length}} CF)</a>
       			</div>
   				<div class="nav navbar-nav navbar-right">
 	  				<div class="btn-group" role="group" aria-label="切換多重">
@@ -50,14 +50,15 @@
   					</div>
   					<div class="form-gorup">
   						<label class="form-label" for="seqno">步驟:</label>
-	  					<input class="form-control" type="range" v-model='seqno' min='-1' :max='getMaxSeqno'/>
+	  					<input class="form-control" type="range" v-model='seqno' min='-1' :max='maxSeqno'/>
   					</div>
   				</form>
 			</div>
 		</nav>
 		<svg id='svg1' width="1024" height="768">
-		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-		    <path v-for="path in paths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
+		    <polygon :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
+		    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
+		    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
 		    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
 	  	</svg>
   	</div>
@@ -85,27 +86,33 @@
 		  pathColor:'red',
 		  seqno: -1,
 		  level: 0,
-		  circles:[
+		  baseTriangle:[
 		    {level:0, x:100, y:742.820323},
 			{level:0, x:900, y:742.820323},
 			{level:0, x:500, y:50}
 		  ],
+		  circles:[],
+		  paths:[],
+		  polygons:[],
 		  history:[]
 		},
 		created: function(){
-			var circles = JSON.parse(JSON.stringify(this.circles));
+			var circles = JSON.parse(JSON.stringify(this.baseTriangle));
 
+			this.circles = JSON.parse(JSON.stringify(this.baseTriangle));
+			this.paths = [
+				{ level:0, beginLevel:0, endLevel:0, begin:circles[0], end:circles[1]},
+				{ level:0, beginLevel:0, endLevel:0, begin:circles[1], end:circles[2]},
+				{ level:0, beginLevel:0, endLevel:0, begin:circles[2], end:circles[0]}
+			];
+			this.polygons = [
+				circles
+			];
 			this.history.push(
 			{
 				level:0,
-				paths:[
-				  { level:0, beginLevel:0, endLevel:0, begin:circles[0], end:circles[1]},
-				  { level:0, beginLevel:0, endLevel:0, begin:circles[1], end:circles[2]},
-				  { level:0, beginLevel:0, endLevel:0, begin:circles[2], end:circles[0]}
-				],
-				polygons:[
-					circles
-				]
+				paths:JSON.parse(JSON.stringify(this.paths)),
+				polygons:JSON.parse(JSON.stringify(this.polygons)),
 			});
 		},
 		computed:{
@@ -115,35 +122,45 @@
 			filterCircles: function(){
 				var self = this;
 				return this.circles.filter(function(el){
-					return el.level <= self.level
+					return el.level <= self.level;
 				});
 			},
-			paths: function(){
-			  var result=[];
+			filterPaths: function(){
+				var self = this;
+				return this.paths.filter(function(el){
+			  		var curSeqno = self.getSeqByPath(self.level, el.beginLevel, el.endLevel)
 
-			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
-			  	for(var idx in this.history[curLevel].paths)
-			  	{
-			  		var path = this.history[curLevel].paths[idx];
-			  		var curSeqno = this.getSeqByPath(this.level, path.beginLevel, path.endLevel)
-
-			  		if(this.seqno <= -1 || this.seqno >= curSeqno)
-			  			result.push(path);
-			  	}
-
-			  return result;
+					return el.level <= self.level && (self.seqno < 0 || self.seqno >= curSeqno);
+				});
 			},
-			polygons: function(){
-			  return this.getPolygons();
+			filterPolygons: function(){
+				var self = this;
+				return this.polygons.filter(function(el){
+					//each points.
+					for(var idx in el)
+					{
+						//filter by level.
+						if(el[idx].level > self.level)
+							return false;
+
+						//filter by seqno.
+						if(self.seqno >= 0){
+							var beignLevel = Math.min(el[idx].level, el[(idx + 1) % el.length].level);
+							var endLevel = Math.max(el[idx].level, el[(idx + 1) % el.length].level);
+
+							if(self.getSeqByPath(self.level, beignLevel, endLevel) > self.seqno)
+								return false;
+						}
+					}
+
+					return true;
+				});
 			},
-			getMaxSeqno: function(){
-				return this.getMaxSeqno2();
+			maxSeqno: function(){
+				return (this.level + 2) * (this.level + 1) / 2 - this.level;
 			}
 		},
 		methods:{
-			getMaxSeqno2: function(){
-				return (this.level + 2) * (this.level + 1) / 2 - this.level;
-			},
 			toogleOver:function(){
 				event.target.classList.toggle(this.pathColor + '-active');
 			},
@@ -157,14 +174,6 @@
 
 				el.classList.toggle(this.pathColor + '-active');
 			},
-			getPolygons:function(){
-			  var result=[];
-
-			  for(var curLevel = 0; curLevel<=this.level; curLevel++)
-			  	Array.prototype.push.apply(result, this.history[curLevel].polygons);
-
-			  return result;
-			},
 			reset:function(){
 				this.seqno = -1;
 				this.level = 0;
@@ -174,14 +183,16 @@
 					this.seqno--;
 			},
 			increaseSeqno:function(){
-				var max = this.getMaxSeqno2();
+				var max = this.maxSeqno;
 
 				if(max > this.seqno)
 					this.seqno++;
 			},
 			decreaseLevel: function(){
-				if(this.level > 0)
+				if(this.level > 0){
+					this.seqno = -1;
 					this.level--;
+				}
 			},
 			increaseLevel: function(){
 				var self = this;
@@ -204,7 +215,7 @@
 				var newPoints = [];
 				var newPaths = [];
 				var newPolygons = [];
-				var oldPolygons = this.getPolygons();
+				var oldPolygons = this.filterPolygons;
 
 				for(var idx in this.history[this.level].polygons){
 				  var polygon = this.history[this.level].polygons[idx];
@@ -215,9 +226,16 @@
 				  	newPoints.push(newPoint);
 
 				  	//get new path
-				  	newPaths.push({ level:newLevel, beginLevel:polygon[0].level, endLevel:newPoint.level, begin:polygon[0], end:newPoint});
-				  	newPaths.push({ level:newLevel, beginLevel:polygon[1].level, endLevel:newPoint.level, begin:polygon[1], end:newPoint});
-				  	newPaths.push({ level:newLevel, beginLevel:polygon[2].level, endLevel:newPoint.level, begin:polygon[2], end:newPoint});
+				  	for(var idx2 in polygon)
+				  	{
+				  		newPaths.push({
+				  			level:newLevel,
+				  			beginLevel:polygon[idx2].level,
+				  			endLevel:newPoint.level,
+				  			begin:polygon[idx2],
+				  			end:newPoint
+				  		});
+				  	}
 
 				  	//get new polygon
 				    var newPolygonCombs = k_combinations([polygon[0], polygon[1], polygon[2], newPoint], 3).filter(function(newPolygon)
@@ -233,22 +251,13 @@
 				this.level = newLevel;
 
 				Array.prototype.push.apply(this.circles, newPoints);
+				Array.prototype.push.apply(this.paths, newPaths);
+				Array.prototype.push.apply(this.polygons, newPolygons);
 				this.history.push({
 				  level: this.level,
 				  paths: newPaths,
 				  polygons: newPolygons
 				});
-			},
-			polygonGenerator: function(pointsArray){
-			   var points = "";
-
-			   for(var idx in pointsArray)
-			     points += pointsArray[idx].x + "," + pointsArray[idx].y + " ";
-
-			   return {
-			     points: points,
-			     style: 'fill:blue;stroke:black;stroke-width:'+1/Math.pow(this.level+1, 0.5)+';fill-opacity:0.3'
-			   };
 			},
 			//取得三角形內心座標
 			getTriangleHeart: function(a, b, c){
