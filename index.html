@@ -39,6 +39,9 @@
 	  				<button class='btn btn-default' @click='reset'>
 	  					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
 	  				</button>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tutorial_modal">
+					  操作說明
+					</button>
 		  		</div>
   				<form id='navbar_form' class="navbar-form navbar-right">
   					<div class="form-group">
@@ -56,11 +59,68 @@
 			</div>
 		</nav>
 		<svg id='svg1' width="1024" height="768">
-		    <polygon :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
+		    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
 		    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
 		    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
 		    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
 	  	</svg>
+	  	<div id='tutorial_modal' class="modal fade" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title">簡介</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="panel panel-default">
+				  <div class="panel-heading">功能說明</div>
+				  <div class="panel-body">
+				    本程式提供檢視多重三角及連線順序及教學使用，可提供檢視多重CF、並依序顯示連線步驟，並可依照選擇線條將CF的連線標記顏色。
+				  </div>
+				</div>
+		      	<div class="panel panel-default">
+				  <div class="panel-heading">按鍵說明</div>
+				  <div class="panel-body">
+				  	切換多重：
+				    <div class="btn-group" role="group" aria-label="切換多重">
+				  		<button class='btn btn-default btn-sm'>
+				  			<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+				  		</button>
+				  		<button class='btn btn-default btn-sm'>
+				  			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				  		</button>
+			  		</div><br/>
+				  	切換步驟：
+			  		<div class="btn-group" role="group" aria-label="切換多重">
+				  		<button class='btn btn-default btn-sm'>
+				  			<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+				  		</button>
+				  		<button class='btn btn-default btn-sm'>
+				  			<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+				  		</button>
+			  		</div><br/>
+				  	重設：
+	  				<button class='btn btn-default btn-sm'>
+	  					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+	  				</button>
+				  </div>
+				</div>
+		      	<div class="panel panel-default">
+				  <div class="panel-heading">快捷鍵</div>
+				  <div class="panel-body">
+			        <p>鍵盤左/右鍵：切換步驟</p>
+			        <p>鍵盤上/下鍵：切換多重</p>
+			        <p>滑鼠滾輪：切換步驟</p>
+			        <p>滑鼠滾輪 + 鍵盤 Shift鍵：切換多重</p>
+				  </div>
+				</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">關閉</button>
+		      </div>
+		    </div><!-- /.modal-content -->
+		  </div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
   	</div>
   	<script type="text/javascript">
   	  var app = new Vue({
@@ -225,9 +285,8 @@
 				  	newPoint.level = newLevel;
 				  	newPoints.push(newPoint);
 
-				  	//get new path
+				  	//add new path
 				  	for(var idx2 in polygon)
-				  	{
 				  		newPaths.push({
 				  			level:newLevel,
 				  			beginLevel:polygon[idx2].level,
@@ -235,12 +294,11 @@
 				  			begin:polygon[idx2],
 				  			end:newPoint
 				  		});
-				  	}
 
-				  	//get new polygon
+				  	//add new polygon
 				    var newPolygonCombs = k_combinations([polygon[0], polygon[1], polygon[2], newPoint], 3).filter(function(newPolygon)
 			    	{
-			      		//排除已存在的組合
+			      		//filter exist polygon
 			    		return !self.checkExist(oldPolygons, newPolygon);
 			    	});
 
@@ -331,6 +389,12 @@
 	          app.decreaseLevel();
 	          break;
 	  	}
+      });
+      document.getElementById('svg1').addEventListener("wheel", function(event){
+      	if(event.deltaY > 0)
+      		event.shiftKey ? app.increaseLevel() : app.increaseSeqno();
+      	if(event.deltaY < 0)
+      		event.shiftKey ? app.decreaseLevel() : app.decreaseSeqno();
       });
   	</script>
   </body>
