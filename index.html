@@ -17,7 +17,7 @@
   		<nav class="navbar navbar-default navbar-fixed-top">
   			<div class="container-fluid">
     			<div class="navbar-header">
-      				<a class="navbar-brand" href="#">{{level+1}}重三角({{this.getPolygons().length}} CF) {{seqno==-1 ? '': ('(第' + seqno +'步)')}}</a>
+      				<a class="navbar-brand" href="#">{{level+1}}重三角({{this.getPolygons().length}} CF){{seqno==-1 ? '': ('&nbsp;-&nbsp;第' + seqno +'步')}}</a>
       			</div>
   				<div class="nav navbar-nav navbar-right">
 	  				<div class="btn-group" role="group" aria-label="切換多重">
@@ -55,7 +55,7 @@
   				</form>
 			</div>
 		</nav>
-		<svg id='svg1' width="600" height="540">
+		<svg id='svg1' width="1024" height="768">
 		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
 		    <path v-for="path in paths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
 		    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
@@ -86,27 +86,27 @@
 		  seqno: -1,
 		  level: 0,
 		  circles:[
-		    {level:0, x:50, y:490},
-			{level:0, x:550, y:490},
-			{level:0, x:300, y:56.9873}
+		    {level:0, x:100, y:742.820323},
+			{level:0, x:900, y:742.820323},
+			{level:0, x:500, y:50}
 		  ],
-		  history:[
-		    {
-		    	level: 0,
+		  history:[]
+		},
+		created: function(){
+			var circles = JSON.parse(JSON.stringify(this.circles));
+
+			this.history.push(
+			{
+				level:0,
 				paths:[
-				  { level:0, beginLevel:0, endLevel:0, begin:{x:50,y:490}, end:{x:550, y:490}},
-				  { level:0, beginLevel:0, endLevel:0, begin:{x:550,y:490}, end:{x:300, y:56.9873}},
-				  { level:0, beginLevel:0, endLevel:0, begin:{x:300,y:56.9873}, end:{x:50, y:490}}
+				  { level:0, beginLevel:0, endLevel:0, begin:circles[0], end:circles[1]},
+				  { level:0, beginLevel:0, endLevel:0, begin:circles[1], end:circles[2]},
+				  { level:0, beginLevel:0, endLevel:0, begin:circles[2], end:circles[0]}
 				],
-		    	polygons:[
-		    	  [
-				    {level:0, x:50, y:490},
-					{level:0, x:550, y:490},
-					{level:0, x:300, y:56.9873}
-				  ]
-		    	]
-		    }
-		  ]
+				polygons:[
+					circles
+				]
+			});
 		},
 		computed:{
 			r:function(){
