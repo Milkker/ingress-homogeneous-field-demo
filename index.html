@@ -14,22 +14,22 @@
   		<button id='btnDown' @click='decreaseLevel'>V</button>
   		<button id='btnUp' @click='increaseLevel'>^</button>
 	  	<button id='btnReset' @click='reset'>重設</button>
-	  	<div id='pathColorSelector'>
-	  		線條畫筆
-	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='black'><span style='font-size:30px;color:black;'>■</span></lavel>
-	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='yellow'><span style='font-size:30px;color:yellow;'>■</span></lavel>
-	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='blue'><span style='font-size:30px;color:blue;'>■</span></lavel>
-	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='green'><span style='font-size:30px;color:green;'>■</span></lavel>
-	  	</div>
-  		<div id='state1'>
+  		<div id='info'>
 	  		{{level+1}}重三角(上下切換)<br/>
   			連線順序(左右切換)：{{seqno==-1 ? '全部連線': seqno}}<br/>
 	  		<input type="range" v-model='seqno' min='-1' :max='getMaxSeqno'/>
   		</div>
+	  	<div id='pathColorSelector'>
+	  		線條畫筆
+	  		<lebel v-for='color in colors'>
+	  			<input type="radio" class="pathColor" v-model="pathColor" :value="color"/>
+	  			<span :class='color + "-active"'>■</span>
+	  		</label>
+	  	</div>
   		<div id='state'>
   			<span>Total CF:{{this.getPolygons().length}}</span>
   		</div>
-	  	<svg id='svg1' width="600" height="540">
+		<svg id='svg1' width="600" height="540">
 		    <polygon v-for="polygon in polygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
 		    <path v-for="path in paths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
 		    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
@@ -55,7 +55,8 @@
 			}
   	  	},
 		data : {
-		  pathColor:'black',
+		  colors:['red', 'green', 'blue', 'purple', 'black'],
+		  pathColor:'red',
 		  seqno: -1,
 		  level: 0,
 		  circles:[
@@ -118,13 +119,12 @@
 				return (this.level + 2) * (this.level + 1) / 2 - this.level;
 			},
 			toogleOver:function(){
-				event.target.classList.toggle('over');
+				event.target.classList.toggle(this.pathColor + '-active');
 			},
 			toogleActive:function(){
 				var el = event.target;
-				var colors = document.querySelectorAll(".pathColor");
 				
-				[].forEach.call(colors, function(color){
+				[].forEach.call(this.colors, function(color){
 					if(color.vale != this.pathColor)
 						el.classList.remove(color.value + '-active');
 				});

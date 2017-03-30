@@ -1,25 +1,34 @@
-.yellow-active
+.pathColor
 {
-	stroke:yellow;
+	font-size:30px;
 }
-.blue-active
+.red-active
 {
-	stroke:blue;
+	color:red;
+	stroke:red;
 }
 .green-active
 {
+	color:green;
 	stroke:green;
+}
+.blue-active
+{
+	color:#33A1C9;
+	stroke:#33A1C9;
+}
+.purple-active
+{
+	color:#8A2BE2;
+	stroke:#8A2BE2;
 }
 .black-active
 {
+	color:black;
 	stroke:black;
 }
-.over
-{
-	stroke:red;
-}
 
-#state1
+#info
 {
 	position: fixed;
 	top: 10px;
@@ -29,9 +38,16 @@
 #pathColorSelector
 {
 	position: fixed;
-	top: 80px;
+	top: 10px;
 	left: 380px;
 	z-index:20;
+}
+
+#state
+{
+	position: fixed;
+	top: 30px;
+	left: 380px;
 }
 
 #btnReset
@@ -69,17 +85,10 @@
 	left: 40px;
 }
 
-#state
-{
-	position: fixed;
-	top: 10px;
-	left: 450px;
-}
-
 #svg1
 {
-	position: fixed;
-	top: 80px;
+	position: relative;
+	top: 120px;
 	left: 20px;
 	background-color: #ddd;
 }
