@@ -1,6 +1,18 @@
-.active
+.yellow-active
+{
+	stroke:yellow;
+}
+.blue-active
 {
 	stroke:blue;
+}
+.green-active
+{
+	stroke:green;
+}
+.black-active
+{
+	stroke:black;
 }
 .over
 {
@@ -12,6 +24,14 @@
 	position: fixed;
 	top: 10px;
 	left: 140px;
+}
+
+#pathColorSelector
+{
+	position: fixed;
+	top: 80px;
+	left: 380px;
+	z-index:20;
 }
 
 #btnReset

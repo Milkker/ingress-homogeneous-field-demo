@@ -14,6 +14,13 @@
   		<button id='btnDown' @click='decreaseLevel'>V</button>
   		<button id='btnUp' @click='increaseLevel'>^</button>
 	  	<button id='btnReset' @click='reset'>重設</button>
+	  	<div id='pathColorSelector'>
+	  		線條畫筆
+	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='black'><span style='font-size:30px;color:black;'>■</span></lavel>
+	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='yellow'><span style='font-size:30px;color:yellow;'>■</span></lavel>
+	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='blue'><span style='font-size:30px;color:blue;'>■</span></lavel>
+	  		<label><input type="radio" class='pathColor' v-model='pathColor' value='green'><span style='font-size:30px;color:green;'>■</span></lavel>
+	  	</div>
   		<div id='state1'>
 	  		{{level+1}}重三角(上下切換)<br/>
   			連線順序(左右切換)：{{seqno==-1 ? '全部連線': seqno}}<br/>
@@ -48,6 +55,7 @@
 			}
   	  	},
 		data : {
+		  pathColor:'black',
 		  seqno: -1,
 		  level: 0,
 		  circles:[
@@ -113,7 +121,15 @@
 				event.target.classList.toggle('over');
 			},
 			toogleActive:function(){
-				event.target.classList.toggle('active');
+				var el = event.target;
+				var colors = document.querySelectorAll(".pathColor");
+				
+				[].forEach.call(colors, function(color){
+					if(color.vale != this.pathColor)
+						el.classList.remove(color.value + '-active');
+				});
+
+				el.classList.toggle(this.pathColor + '-active');
 			},
 			getPolygons:function(){
 			  var result=[];
