@@ -254,9 +254,7 @@
 					this.seqno--;
 			},
 			increaseSeqno:function(){
-				var max = this.maxSeqno;
-
-				if(max > this.seqno)
+				if(this.maxSeqno > this.seqno)
 					this.seqno++;
 			},
 			decreaseLevel: function(){
@@ -337,15 +335,12 @@
 			},
 			checkExist: function(polygonList, polygon){
 				for(var idx in polygonList){
-					var exist = false;
 					for(var idx2 in polygon){
 						if(polygon[idx2].x != polygonList[idx][idx2].x || polygon[idx2].y != polygonList[idx][idx2].y)
 							break;
-						else if(idx2 == 2)
-							exist = true;
+						else if(idx2 == polygon.length - 1)
+							return true;
 					}
-					if(exist)
-						return true;
 				}
 				return false;
 			},
