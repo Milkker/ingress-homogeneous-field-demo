@@ -125,22 +125,6 @@
   	<script type="text/javascript">
   	  var app = new Vue({
   	  	el:"#app1",
-  	  	filters: {
-  	  		path_d : function(path){
-  	  			return 'M' + path.begin.x + ' ' + path.begin.y + ' L' + path.end.x + ' ' + path.end.y;
-  	  		},
-			polygon_points: function(polygon){
-			   var points = "";
-
-			   for(var idx in polygon)
-			     points += polygon[idx].x + "," + polygon[idx].y + " ";
-
-			   return points;
-			},
-			polygon_style: function(polygon){
-			   return 'fill:blue;stroke:none;fill-opacity:0.1'
-			}
-  	  	},
 		data : {
 		  colors:['red', 'green', 'blue', 'purple', 'black'],
 		  pathColor:'red',
@@ -175,42 +159,53 @@
 				polygons:JSON.parse(JSON.stringify(this.polygons)),
 			});
 		},
+  	  	filters: {
+  	  		path_d : function(path){
+  	  			return 'M' + path.begin.x + ' ' + path.begin.y + ' L' + path.end.x + ' ' + path.end.y;
+  	  		},
+			polygon_points: function(polygon){
+			   var points = "";
+
+			   for(var idx in polygon)
+			     points += polygon[idx].x + "," + polygon[idx].y + " ";
+
+			   return points;
+			},
+			polygon_style: function(polygon){
+			   return 'fill:blue;stroke:none;fill-opacity:0.1'
+			}
+  	  	},
 		computed:{
 			r:function(){
 				return (1/Math.pow(this.level+1, 0.5)) * 3;
 			},
 			filterCircles: function(){
 				var self = this;
+
 				return this.circles.filter(function(el){
 					return el.level <= self.level;
 				});
 			},
 			filterPaths: function(){
-				var self = this;
-				return this.paths.filter(function(el){
-			  		var curSeqno = self.getSeqByPath(self.level, el.beginLevel, el.endLevel)
+				var pathTypes = this.visiablePathTypes;
 
-					return el.level <= self.level && (self.seqno < 0 || self.seqno >= curSeqno);
+				return this.paths.filter(function(el){
+					return pathTypes[el.beginLevel] != undefined && pathTypes[el.beginLevel][el.endLevel] == 1;
 				});
 			},
 			filterPolygons: function(){
 				var self = this;
+				var pathTypes = this.visiablePathTypes;
+
 				return this.polygons.filter(function(el){
 					//each points.
 					for(var idx in el)
 					{
-						//filter by level.
-						if(el[idx].level > self.level)
+						var beignLevel = Math.min(el[idx].level, el[(idx + 1) % el.length].level);
+						var endLevel = Math.max(el[idx].level, el[(idx + 1) % el.length].level);
+
+						if(pathTypes[beignLevel] == undefined || pathTypes[beignLevel][endLevel] != 1)
 							return false;
-
-						//filter by seqno.
-						if(self.seqno >= 0){
-							var beignLevel = Math.min(el[idx].level, el[(idx + 1) % el.length].level);
-							var endLevel = Math.max(el[idx].level, el[(idx + 1) % el.length].level);
-
-							if(self.getSeqByPath(self.level, beignLevel, endLevel) > self.seqno)
-								return false;
-						}
 					}
 
 					return true;
@@ -218,6 +213,21 @@
 			},
 			maxSeqno: function(){
 				return (this.level + 2) * (this.level + 1) / 2 - this.level;
+			},
+			visiablePathTypes: function(){
+				var maxSeqno = this.seqno < 0 ? this.maxSeqno : this.seqno;
+				var pathTypes = {};
+
+				for (var seq = 1; seq <= maxSeqno; seq++){
+					var pathType = this.getPathBySeq(this.level, seq);
+
+					if(pathTypes[pathType.beginLevel] == undefined)
+						pathTypes[pathType.beginLevel] = {};
+
+					pathTypes[pathType.beginLevel][pathType.endLevel] = 1;
+				}
+
+				return pathTypes;
 			}
 		},
 		methods:{
@@ -358,13 +368,16 @@
 				return endLevel - beginLevel + maxNumInPreviousRow + 1 - h + (h == level ? 1 : 0);
 			},
 			getPathBySeq: function(level, seq){
+				//舊版level base on zero 但計算公式是base on one。
+				level++;
 				var h = Math.ceil((Math.pow(8*seq + 1, 0.5) - 1) / 2);
-				var maxNumInRow = h * (1 + h)/2;
+					h = h > level -1 ? level - 1 : h;
+				var maxNumInPreviousRow = h * (h - 1)/2;
 
 				//舊版level base on zero 但計算公式是base on one。
 				return {
-					beginLevel: level - h + 1 - 1,
-					endLevel: level + seq - maxNumInRow - 1
+					beginLevel: level - h - 1,
+					endLevel: seq - maxNumInPreviousRow + level - h - (h + 1 >= level ? 1 : 0) - 1
 				}
 			}
 		},
