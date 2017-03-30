@@ -129,6 +129,7 @@
 		  colors:['red', 'green', 'blue', 'purple', 'black'],
 		  pathColor:'red',
 		  seqno: -1,
+		  calcLevel: 0,
 		  level: 0,
 		  baseTriangle:[
 		    {level:0, x:100, y:742.820323},
@@ -138,7 +139,6 @@
 		  circles:[],
 		  paths:[],
 		  polygons:[],
-		  history:[]
 		},
 		created: function(){
 			var circles = JSON.parse(JSON.stringify(this.baseTriangle));
@@ -152,12 +152,6 @@
 			this.polygons = [
 				circles
 			];
-			this.history.push(
-			{
-				level:0,
-				paths:JSON.parse(JSON.stringify(this.paths)),
-				polygons:JSON.parse(JSON.stringify(this.polygons)),
-			});
 		},
   	  	filters: {
   	  		path_d : function(path){
@@ -266,19 +260,14 @@
 			},
 			increaseLevel: function(){
 				var self = this;
-				var hasHistory = false;
 				self.seqno = -1;
 
-				//檢查歷史紀錄
-				for(var idx in this.history)
-				{
-					if(this.history[idx].level == this.level+1){
-						this.level++;
-						hasHistory = true;
-						break;
-					}
+				if(this.calcLevel >= this.level + 1){
+					this.level++;
+					return;
 				}
-				if(hasHistory || (this.level >= 5 && !confirm('因連線數限制，最多實現六重三角，確定要突破極限？')))
+
+				if(this.level >= 5 && !confirm('因連線數限制，最多實現六重三角，確定要突破極限？'))
 					return;
 
 				var newLevel = this.level+1;
@@ -286,9 +275,10 @@
 				var newPaths = [];
 				var newPolygons = [];
 				var oldPolygons = this.filterPolygons;
+				var lastPolygons = this.polygons.filter(function(el) {return this.level == el.level});
 
-				for(var idx in this.history[this.level].polygons){
-				  var polygon = this.history[this.level].polygons[idx];
+				for(var idx in lastPolygons){
+				  var polygon = lastPolygons[idx];
 				  var newPoint = this.getTriangleHeart(polygon[0], polygon[1], polygon[2]);
 
 				  if(!this.circles.includes(newPoint)){
@@ -317,15 +307,11 @@
 				}
 
 				this.level = newLevel;
+				this.calcLevel = newLevel;
 
 				Array.prototype.push.apply(this.circles, newPoints);
 				Array.prototype.push.apply(this.paths, newPaths);
 				Array.prototype.push.apply(this.polygons, newPolygons);
-				this.history.push({
-				  level: this.level,
-				  paths: newPaths,
-				  polygons: newPolygons
-				});
 			},
 			//取得三角形內心座標
 			getTriangleHeart: function(a, b, c){
