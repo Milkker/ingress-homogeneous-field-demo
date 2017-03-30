@@ -181,6 +181,14 @@
 				});
 			},
 			filterPaths: function(){
+				var self = this;
+				
+				if(self.seqno < 0)
+					return this.paths.filter(function(el)
+					{
+						return el.level <= self.level;
+					});
+
 				var pathTypes = this.visiablePathTypes;
 
 				return this.paths.filter(function(el){
@@ -188,7 +196,6 @@
 				});
 			},
 			filterPolygons: function(){
-				var self = this;
 				var pathTypes = this.visiablePathTypes;
 
 				return this.polygons.filter(function(el){
