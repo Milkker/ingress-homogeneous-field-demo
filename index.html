@@ -72,12 +72,14 @@
 		  	<p class="text-muted text-right">Copyright © 2017 <a href='https://github.com/Milkker'>Milkker</a>. Powered by <a href='https://vuejs.org/'>Vue</a>.</p>
 		  </div>
 		</footer>
-		<svg id='svg1' :width="width" :height="height">
-		    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
-		    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-		    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
-		    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
-	  	</svg>
+		<div class='text-center'>
+			<svg id='svg1' class='text-center' :width="width" :height="height">
+			    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
+			    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
+			    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
+			    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
+		  	</svg>
+	  	</div>
 	  	<div id='tutorial_modal' class="modal fade" tabindex="-1" role="dialog">
 		  <div class="modal-dialog" role="document">
 		    <div class="modal-content">
