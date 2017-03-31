@@ -67,6 +67,12 @@
 				</div>
 			</div>
 		</nav>
+		<footer class="footer">
+		  <div class="container">
+		  	<p class="text-muted text-right">Copyright © 2017 <a href='https://github.com/Milkker'>Milkker</a>. Powered by <a href='https://vuejs.org/'>Vue</a>.</p>
+		    
+		  </div>
+		</footer>
 		<svg id='svg1' width="1024" height="768">
 		    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
 		    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
