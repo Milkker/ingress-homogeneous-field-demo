@@ -46,4 +46,5 @@ body
 #svg1 path
 {
 	cursor:pointer;
+	opacity: 0.5;
 }

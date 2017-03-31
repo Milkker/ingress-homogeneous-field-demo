@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta charset="UTF-8">
+  	<title>Ingress homogeneous field test</title>
+  	<script src="ingress-homo-field-calculator.js"></script>
+  	<script src="ingress-homo-field-calculator.test.js"></script>
+  	<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.5/vue.min.js' type="text/javascript"></script>
+  </head>
+  <body>
+  	<div id='app1'>
+	  	<input type="text" v-model="level"/>
+	  	<button @click='genericTestCase'>產生測試案例</button><br/>
+	  	<button @click='startTesting'>開始測試</button>
+	  	<table>
+	  		<thead>
+	  			<tr>
+	  				<th>Level</th>
+	  				<th>Seq</th>
+	  				<th>Begin Level</th>
+	  				<th>End Level</th>
+	  				<th>Success</th>
+	  				<th></th>
+	  			</tr>
+	  		</thead>
+	  		<tbody>
+	  			<tr v-for="mycase in cases">
+	  				<td>
+	  					{{mycase.level}}
+	  				</td>
+	  				<td>
+	  					{{mycase.seq}}
+	  				</td>
+	  				<td>
+	  					{{mycase.beginLevel}}
+	  				</td>
+	  				<td>
+	  					{{mycase.endLevel}}
+	  				</td>
+	  				<td>
+	  					{{mycase.success}}
+	  				</td>
+	  				<td>
+	  					<!-- <button @click="unitTest({{mycase.level}}, {{mycase.seq}}, {{mycase.beginLevel}}, {{mycase.endLevel}})">重新測試</button> -->
+	  				</td>
+	  			</tr>
+	  		</tbody>
+	  	</table>
+  	</div>
+  	<script type="text/javascript">
+  	  var tester = new ingressHomoFieldCalculatorTest();
+  	  var api = new IngressHomoFieldCalculator();
+  	  var app = new Vue({
+  	  	el:'#app1',
+  	  	data:{
+  	  		level:1,
+          cases:[]
+  	  	},
+  	  	methods:{
+  	  		genericTestCase:function(){
+  	  			tester.genericTestCase(this.level);
+
+            this.cases= JSON.parse(JSON.stringify(tester.getTestCases()));
+  	  		},
+  	  		startTesting:function(){
+  	  			tester.start(api.getPathBySeq);
+            this.cases= JSON.parse(JSON.stringify(tester.getTestCases()));
+  	  		},
+  	  		unitTest:function(level, seq, beginLevel, endLevel){
+  	  			var result = tester.unitTest(api.getPathBySeq, {
+  	  				level,
+  	  				seq,
+  	  				level,
+  	  				endLevel
+  	  			});
+  	  		}
+  	  	}
+  	  });
+  	</script>
+  </body>
+</html>
