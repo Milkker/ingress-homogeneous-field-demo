@@ -2,7 +2,8 @@
 <html>
   <head>
   	<meta charset="UTF-8">
-  	<title>Ingress homogeneous field demo</title>
+  	<meta content="width=device-width,initial-scale=1" name="viewport">
+  	<title>Ingress homogeneous field demo. </title>
   	<link rel='stylesheet' href='style.css' type="text/css">
   	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -14,50 +15,56 @@
   	<script src="ingress-homo-field-calculator.js"></script>
   </head>
   <body>
-  	<div id='app1' class='container-fluid'>
+  	<div id='app1'>
   		<nav class="navbar navbar-default navbar-fixed-top">
   			<div class="container-fluid">
     			<div class="navbar-header">
+				    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu1" aria-expanded="false">
+				        <span class="sr-only">Toggle navigation</span>
+				        <span class="icon-bar"></span>
+				        <span class="icon-bar"></span>
+				        <span class="icon-bar"></span>
+				    </button>
       				<a class="navbar-brand" href="#">{{level+1}}重三角{{seqno==-1 ? '': ('&nbsp;-&nbsp;第' + seqno +'步')}}&nbsp;({{this.filterPolygons.length}} CF)</a>
       			</div>
-  				<div class="nav navbar-nav navbar-right">
-	  				<div class="btn-group" role="group" aria-label="切換多重">
-				  		<button class='btn btn-default' @click='decreaseLevel'>
-				  			<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-				  		</button>
-				  		<button class='btn btn-default' @click='increaseLevel'>
-				  			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				  		</button>
-				  	</div>
-	  				<div class="btn-group" role="group" aria-label="切換步驟">
-				  		<button class='btn btn-default' @click='decreaseSeqno'>
-				  			<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-				  		</button>
-				  		<button class='btn btn-default' @click='increaseSeqno'>
-				  			<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-				  		</button>
-			  		</div>
-	  				<button class='btn btn-default' @click='reset'>
-	  					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
-	  				</button>
-					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tutorial_modal">
-					  操作說明
-					</button>
-		  		</div>
-  				<form id='navbar_form' class="navbar-form navbar-right">
-  					<div class="form-group">
-  						<label>線條:</label>
-				  		<label v-for='color in colors'>
-				  			<input type="radio" v-model="pathColor" :value="color"/>
-				  			<span :class='color + "-active pathColor"'>■</span>&nbsp;
-				  		</label>
-  						<label><input type="checkbox" v-model="lock" />鎖定</label>
-  						<label v-show='!lock'>步驟:</label>
-	  					<input v-show='!lock' class="form-control" type="range" v-model='seqno' min='-1' :max='maxSeqno'/>
-  					</div>
-  					<div class="form-gorup">
-  					</div>
-  				</form>
+			    <!-- Collect the nav links, forms, and other content for toggling -->
+			    <div class="collapse navbar-collapse" id="menu1">
+	  				<form id='navbar_form' class="navbar-form navbar-right">
+	  					<div class="form-group">
+	  						<label>線條:</label>
+					  		<label v-for='color in colors'>
+					  			<input type="radio" v-model="pathColor" :value="color"/>
+					  			<span :class='color + "-active pathColor"'>■</span>&nbsp;
+					  		</label>
+	  					</div>
+	  					<div class="form-group">
+	  						<label><input type="checkbox" v-model="lock" />鎖定</label>
+		  					<input v-show='!lock' class="form-control" type="range" v-model='seqno' min='-1' :max='maxSeqno'/>
+	  					</div>
+	  					<div class="btn-group" role="group" aria-label="切換多重">
+					  		<button class='btn btn-default' @click.prevent='decreaseLevel'>
+					  			<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+					  		</button>
+					  		<button class='btn btn-default' @click.prevent='increaseLevel'>
+					  			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					  		</button>
+					  	</div>
+		  				<div class="btn-group" role="group" aria-label="切換步驟">
+					  		<button class='btn btn-default' :disabled='lock' @click.prevent='decreaseSeqno'>
+					  			<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+					  		</button>
+					  		<button class='btn btn-default' :disabled='lock' @click.prevent='increaseSeqno'>
+					  			<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+					  		</button>
+				  		</div>
+		  				<button class='btn btn-default' @click.prevent='reset'>
+		  					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+		  				</button>
+						<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tutorial_modal">
+						  操作說明
+						</button>
+	  				</form>
+				</div>
 			</div>
 		</nav>
 		<svg id='svg1' width="1024" height="768">
@@ -76,7 +83,7 @@
 		      <div class="modal-body">
 			    <p>本程式提供檢視多重三角及連線順序及教學使用，提供<mark>檢視多重CF</mark>、<mark>切換連線步驟</mark>、<mark>鎖定</mark>及<mark>標記線條顏色</mark>功能。</p>
 		      	<div class="panel panel-default">
-				  <div class="panel-heading">功能說明</div>
+				  <div class="panel-heading"><h3 class="panel-title">功能說明</h3></div>
 				  <div class="panel-body">
 				    <dl>
 					  <dt>檢視多重CF</dt>
@@ -89,7 +96,7 @@
 				  			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 				  		</button>
 			  			</div>
-			  		  、鍵盤上下鍵或滑鼠滾輪加鍵盤Shift鍵切換。</dd>
+			  		  、<mark>鍵盤上下鍵</mark>或<mark>滑鼠滾輪加鍵盤Shift鍵</mark>切換。</dd>
 					  <dt>切換連線步驟</dt>
 					  <dd>點選
 					  	<div class="btn-group" role="group" aria-label="切換多重">
@@ -100,16 +107,16 @@
 				  			<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
 				  		</button>
 			  			</div>
-			  		  、鍵盤左右鍵、移動步驟滾輪或滑鼠滾輪鍵切換。</dd>
+			  		  、<mark>鍵盤左右鍵</mark>、拖移<mark>步驟滾輪</mark>或使用<mark>滑鼠滾輪</mark>切換。</dd>
 					  <dt>鎖定</dt>
-					  <dd>勾選鎖定後，可避免滾輪、按鍵及按鈕切換連線步驟。</dd>
+					  <dd>勾選鎖定<mark>避免切換連線步驟</mark>。</dd>
 					  <dt>標記線條</dt>
-					  <dd>選擇顏色後，點選線條即可標記線條顏色。</dd>
+					  <dd>選擇顏色後，點選線條即可<mark>標記線條顏色</mark>。</dd>
 					</dl>
 				  </div>
 				</div>
 		      	<div class="panel panel-default">
-				  <div class="panel-heading">快捷鍵</div>
+				  <div class="panel-heading"><h3 class="panel-title">快捷鍵</h3></div>
 				  <div class="panel-body">
 				  	<dl>
 				  		<dt>鍵盤左/右鍵</dt>
