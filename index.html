@@ -46,15 +46,16 @@
 		  		</div>
   				<form id='navbar_form' class="navbar-form navbar-right">
   					<div class="form-group">
-  						<label class="form-label" for="color">線條:</label>
+  						<label>線條:</label>
 				  		<label v-for='color in colors'>
 				  			<input type="radio" v-model="pathColor" :value="color"/>
 				  			<span :class='color + "-active pathColor"'>■</span>&nbsp;
 				  		</label>
+  						<label><input type="checkbox" v-model="lock" />鎖定</label>
+  						<label v-show='!lock'>步驟:</label>
+	  					<input v-show='!lock' class="form-control" type="range" v-model='seqno' min='-1' :max='maxSeqno'/>
   					</div>
   					<div class="form-gorup">
-  						<label class="form-label" for="seqno">步驟:</label>
-	  					<input class="form-control" type="range" v-model='seqno' min='-1' :max='maxSeqno'/>
   					</div>
   				</form>
 			</div>
@@ -70,55 +71,59 @@
 		    <div class="modal-content">
 		      <div class="modal-header">
 		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		        <h4 class="modal-title">簡介</h4>
+		        <h4 class="modal-title">操作說明</h4>
 		      </div>
 		      <div class="modal-body">
+			    <p>本程式提供檢視多重三角及連線順序及教學使用，提供<mark>檢視多重CF</mark>、<mark>切換連線步驟</mark>、<mark>鎖定</mark>及<mark>標記線條顏色</mark>功能。</p>
 		      	<div class="panel panel-default">
 				  <div class="panel-heading">功能說明</div>
 				  <div class="panel-body">
-				    本程式提供檢視多重三角及連線順序及教學使用，可提供檢視多重CF、並依序顯示連線步驟，並可依照選擇線條將CF的連線標記顏色。
-				  </div>
-				</div>
-		      	<div class="panel panel-default">
-				  <div class="panel-heading">按鍵說明</div>
-				  <div class="panel-body">
-				  	切換多重：
-				    <div class="btn-group" role="group" aria-label="切換多重">
-				  		<button class='btn btn-default btn-sm'>
+				    <dl>
+					  <dt>檢視多重CF</dt>
+					  <dd>點選
+					  	<div class="btn-group" role="group" aria-label="切換多重">
+				  		<button class='btn btn-default btn-xs'>
 				  			<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
 				  		</button>
-				  		<button class='btn btn-default btn-sm'>
+				  		<button class='btn btn-default btn-xs'>
 				  			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 				  		</button>
-			  		</div><br/>
-				  	切換步驟：
-			  		<div class="btn-group" role="group" aria-label="切換多重">
-				  		<button class='btn btn-default btn-sm'>
+			  			</div>
+			  		  、鍵盤上下鍵或滑鼠滾輪加鍵盤Shift鍵切換。</dd>
+					  <dt>切換連線步驟</dt>
+					  <dd>點選
+					  	<div class="btn-group" role="group" aria-label="切換多重">
+				  		<button class='btn btn-default btn-xs'>
 				  			<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
 				  		</button>
-				  		<button class='btn btn-default btn-sm'>
+				  		<button class='btn btn-default btn-xs'>
 				  			<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
 				  		</button>
-			  		</div><br/>
-				  	重設：
-	  				<button class='btn btn-default btn-sm'>
-	  					<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
-	  				</button>
+			  			</div>
+			  		  、鍵盤左右鍵、移動步驟滾輪或滑鼠滾輪鍵切換。</dd>
+					  <dt>鎖定</dt>
+					  <dd>勾選鎖定後，可避免滾輪、按鍵及按鈕切換連線步驟。</dd>
+					  <dt>標記線條</dt>
+					  <dd>選擇顏色後，點選線條即可標記線條顏色。</dd>
+					</dl>
 				  </div>
 				</div>
 		      	<div class="panel panel-default">
 				  <div class="panel-heading">快捷鍵</div>
 				  <div class="panel-body">
-			        <p>鍵盤左/右鍵：切換步驟</p>
-			        <p>鍵盤上/下鍵：切換多重</p>
-			        <p>滑鼠滾輪：切換步驟</p>
-			        <p>滑鼠滾輪 + 鍵盤 Shift鍵：切換多重</p>
+				  	<dl>
+				  		<dt>鍵盤左/右鍵</dt>
+				  		<dd>切換步驟</dd>
+				  		<dt>鍵盤上/下鍵</dt>
+				  		<dd>切換多重</dd>
+				  		<dt>滑鼠滾輪</dt>
+				  		<dd>切換步驟</dd>
+				  		<dt>滑鼠滾輪 + 鍵盤 Shift鍵</dt>
+				  		<dd>切換多重</dd>
+				  	</dl>
 				  </div>
 				</div>
-		      </div>
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default" data-dismiss="modal">關閉</button>
-		      </div>
+		      </div><!-- /.modal-body -->
 		    </div><!-- /.modal-content -->
 		  </div><!-- /.modal-dialog -->
 		</div><!-- /.modal -->
@@ -130,6 +135,7 @@
 		data : {
 		  colors:['red', 'green', 'blue', 'purple', 'black'],
 		  pathColor:'red',
+		  lock:false,
 		  seqno: -1,
 		  calcLevel: 0,
 		  level: 0,
@@ -239,10 +245,11 @@
 			},
 			toogleActive:function(){
 				var el = event.target;
+				var self = this;
 				
-				[].forEach.call(this.colors, function(color){
-					if(color.vale != this.pathColor)
-						el.classList.remove(color.value + '-active');
+				this.colors.forEach(function(color){
+					if(color != self.pathColor)
+						el.classList.remove(color + '-active');
 				});
 
 				el.classList.toggle(this.pathColor + '-active');
@@ -252,10 +259,14 @@
 				this.level = 0;
 			},
 			decreaseSeqno: function(){
+				if(this.lock)
+					return;
 				if(this.seqno > -1)
 					this.seqno--;
 			},
 			increaseSeqno:function(){
+				if(this.lock)
+					return;
 				if(this.maxSeqno > this.seqno)
 					this.seqno++;
 			},
