@@ -70,10 +70,9 @@
 		<footer class="footer">
 		  <div class="container">
 		  	<p class="text-muted text-right">Copyright © 2017 <a href='https://github.com/Milkker'>Milkker</a>. Powered by <a href='https://vuejs.org/'>Vue</a>.</p>
-		    
 		  </div>
 		</footer>
-		<svg id='svg1' width="1024" height="768">
+		<svg id='svg1' :width="width" :height="height">
 		    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
 		    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
 		    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
@@ -146,22 +145,37 @@
   	  var app = new Vue({
   	  	el:"#app1",
 		data : {
+		  width: 1024,
+		  height: 768,
 		  colors:['red', 'green', 'blue', 'purple', 'black'],
 		  pathColor:'red',
 		  lock:false,
 		  seqno: -1,
 		  calcLevel: 0,
 		  level: 0,
-		  baseTriangle:[
-		    {level:0, x:100, y:742.820323},
-			{level:0, x:900, y:742.820323},
-			{level:0, x:500, y:50}
-		  ],
+		  baseTriangle:[],
 		  circles:[],
 		  paths:[],
 		  polygons:[],
 		},
 		created: function(){
+			//create base triangle dependence on screen size.
+			var width = Math.min(screen.width, screen.height);
+			width = width * 0.98;
+
+			var offset = width * 0.02;
+			var triangleWidth = width - 2 * offset;
+			var triangleHeight = triangleWidth * Math.pow(3, 0.5) / 2;
+
+			this.width = width;
+			this.height = triangleHeight + offset * 2;
+
+			this.baseTriangle = [
+			    {level:0, x:offset, y:offset + triangleHeight},
+				{level:0, x:triangleWidth + offset, y:offset + triangleHeight},
+				{level:0, x:width / 2, y:offset}
+			];
+
 			var circles = JSON.parse(JSON.stringify(this.baseTriangle));
 
 			this.circles = JSON.parse(JSON.stringify(this.baseTriangle));
