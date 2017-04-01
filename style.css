@@ -4,6 +4,12 @@ body
 	margin-bottom: 30px;
 }
 
+.mobile_toolbar
+{
+	padding:0px !important;
+	margin:10px 5px !important;
+}
+
 .footer {
   position: fixed;
   bottom: 0;
