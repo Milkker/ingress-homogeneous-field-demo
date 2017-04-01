@@ -98,7 +98,7 @@
 			<svg id='svg1' class='text-center' :width="width" :height="height">
 			    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
 			    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-			    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='none' stroke='white' :stroke-width="r" />
+			    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='white' stroke='none' :stroke-width="10" />
 			    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
 		  	</svg>
 	  	</div>
@@ -214,7 +214,37 @@
 		},
   	  	filters: {
   	  		path_d : function(path){
-  	  			return 'M' + path.begin.x + ' ' + path.begin.y + ' L' + path.end.x + ' ' + path.end.y;
+  	  			var angle = Math.atan((path.end.y - path.begin.y) / (path.end.x - path.begin.x));
+  	  			var points = [];
+  	  			var x_offset = Math.sin(angle) * 1.5;
+  	  			var y_offset = Math.cos(angle) * 1.5;
+
+  	  			points.push({
+  	  				x:path.begin.x + x_offset,
+  	  				y:path.begin.y - y_offset
+  	  			});
+
+  	  			points.push({
+  	  				x:path.end.x + x_offset,
+  	  				y:path.end.y - y_offset
+  	  			});
+
+  	  			points.push({
+  	  				x:path.end.x - x_offset,
+  	  				y:path.end.y + y_offset
+  	  			});
+
+  	  			points.push({
+  	  				x:path.begin.x - x_offset,
+  	  				y:path.begin.y + y_offset
+  	  			});
+
+  	  			var result = "";
+
+  	  			for(var idx in points)
+  	  				result += (idx == 0 ? 'M':'L') + points[idx].x + ' ' + points[idx].y + ' '; 
+
+  	  			return result + ' Z';
   	  		},
 			polygon_points: function(polygon){
 			   var points = "";
@@ -393,8 +423,8 @@
 			  var totalLenth = length_ab + length_bc + length_ac;
 			  
 			  return {
-			    x: Math.round(((a.x * length_bc + b.x * length_ac + c.x * length_ab)/totalLenth) * 10000) / 10000,
-			    y: Math.round(((a.y * length_bc + b.y * length_ac + c.y * length_ab)/totalLenth) * 10000) / 10000,
+			    x: (a.x * length_bc + b.x * length_ac + c.x * length_ab)/totalLenth,
+			    y: (a.y * length_bc + b.y * length_ac + c.y * length_ab)/totalLenth,
 			  }
 			},
 			checkExist: function(polygonList, polygon){
