@@ -64,3 +64,8 @@ body
 	cursor:pointer;
     pointer-events:all;
 }
+
+#svg1 path:hover
+{
+	opacity:0.5;
+};

@@ -98,7 +98,7 @@
 			<svg id='svg1' class='text-center' :width="width" :height="height">
 			    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
 			    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-			    <path v-for="path in filterPaths" :d="path | path_d" @mouseover='toogleOver' @mouseout='toogleOver' @click='toogleActive' fill='white' stroke='none' :stroke-width="10" />
+			    <path v-for="path in filterPaths" :d="path | path_d" @click='toogleActive' fill='white' stroke='none' :stroke-width="10" />
 			    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
 		  	</svg>
 	  	</div>
@@ -321,9 +321,6 @@
 			}
 		},
 		methods: {
-			toogleOver:function(){
-				event.target.classList.toggle(this.pathColor + '-active');
-			},
 			toogleActive:function(){
 				var el = event.target;
 				var self = this;
