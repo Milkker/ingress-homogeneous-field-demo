@@ -12,6 +12,7 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   	<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.5/vue.min.js' type="text/javascript"></script>
   	<script src="combinations.js"></script>
+  	<script src="svg-component.js"></script>
   	<script src="ingress-homo-field-calculator.js"></script>
   </head>
   <body>
@@ -96,10 +97,10 @@
 		</footer>
 		<div class='text-center'>
 			<svg id='svg1' class='text-center' :width="width" :height="height">
-			    <polygon id='baseTriangle' :points="baseTriangle | polygon_points" style="fill:#ccc;stroke:none;" />
-			    <polygon v-for="polygon in filterPolygons" :points="polygon | polygon_points" :style="polygon | polygon_style" />
-			    <path v-for="path in filterPaths" :d="path | path_d" @click='toogleActive' fill='white' stroke='none' :stroke-width="10" />
-			    <circle v-for="circle in filterCircles" :cx="circle.x" :cy="circle.y" :r="r" stroke="none" fill="red"/>
+			    <my-polygon id='baseTriangle' :polygon="baseTriangle" style="fill:#ccc;stroke:none;" />
+			    <my-polygon v-for="polygon in filterPolygons" :polygon="polygon" style="fill:blue;stroke:none;fill-opacity:0.1" />
+			    <my-path v-for="path in filterPaths" :path="path" @click='toogleActive' fill='white' stroke='none' stroke-width="3" />
+			    <my-circle v-for="circle in filterCircles" :circle="circle" r="3" stroke="none" fill="red"/>
 		  	</svg>
 	  	</div>
 	  	<div id='tutorial_modal' class="modal fade" tabindex="-1" role="dialog">
@@ -212,52 +213,6 @@
 				circles
 			];
 		},
-  	  	filters: {
-  	  		path_d : function(path){
-  	  			var angle = Math.atan((path.end.y - path.begin.y) / (path.end.x - path.begin.x));
-  	  			var points = [];
-  	  			var x_offset = Math.sin(angle) * 1.5;
-  	  			var y_offset = Math.cos(angle) * 1.5;
-
-  	  			points.push({
-  	  				x:path.begin.x + x_offset,
-  	  				y:path.begin.y - y_offset
-  	  			});
-
-  	  			points.push({
-  	  				x:path.end.x + x_offset,
-  	  				y:path.end.y - y_offset
-  	  			});
-
-  	  			points.push({
-  	  				x:path.end.x - x_offset,
-  	  				y:path.end.y + y_offset
-  	  			});
-
-  	  			points.push({
-  	  				x:path.begin.x - x_offset,
-  	  				y:path.begin.y + y_offset
-  	  			});
-
-  	  			var result = "";
-
-  	  			for(var idx in points)
-  	  				result += (idx == 0 ? 'M':'L') + points[idx].x + ' ' + points[idx].y + ' '; 
-
-  	  			return result + ' Z';
-  	  		},
-			polygon_points: function(polygon){
-			   var points = "";
-
-			   for(var idx in polygon)
-			     points += polygon[idx].x + "," + polygon[idx].y + " ";
-
-			   return points;
-			},
-			polygon_style: function(polygon){
-			   return 'fill:blue;stroke:none;fill-opacity:0.1'
-			}
-  	  	},
 		computed:{
 			r:function(){
 				return (1/Math.pow(this.level+1, 0.5)) * 3;
