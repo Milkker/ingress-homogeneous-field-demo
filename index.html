@@ -185,9 +185,7 @@
 		},
 		created: function(){
 			//create base triangle dependence on screen size.
-			var width = Math.min(screen.width, screen.height);
-			width = width * 0.98;
-
+			var width = Math.min(screen.availWidth, screen.availHeight) - 72;
 			var offset = width * 0.02;
 			var triangleWidth = width - 2 * offset;
 			var triangleHeight = triangleWidth * Math.pow(3, 0.5) / 2;
